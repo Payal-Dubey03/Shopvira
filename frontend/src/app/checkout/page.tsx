@@ -1,10 +1,86 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Lock, Truck, CreditCard, CheckCircle } from "lucide-react";
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleCompleteOrder = async () => {
+    setLoading(true);
+    try {
+      // Get form values
+      const firstName = (document.querySelector('input[placeholder="First Name"]') as HTMLInputElement)?.value;
+      const lastName = (document.querySelector('input[placeholder="Last Name"]') as HTMLInputElement)?.value;
+      const email = (document.querySelector('input[placeholder="Email Address"]') as HTMLInputElement)?.value;
+      const phone = (document.querySelector('input[placeholder="Phone Number"]') as HTMLInputElement)?.value;
+
+      if (!firstName || !lastName || !email || !phone) {
+        alert("Please fill in all address fields!");
+        setLoading(false);
+        return;
+      }
+
+      // Razorpay Integration
+      const options = {
+        key: "rzp_test_dummykey", // Replace with your actual key
+        amount: 1398 * 100, // Amount in paise
+        currency: "INR",
+        name: "ShopVira",
+        description: "Payment for your gift order",
+        image: "/logo.png",
+        handler: async function (response: any) {
+          console.log("Payment Success:", response);
+          
+          // Call backend API to save order after successful payment
+          const orderResponse = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              firstName, 
+              lastName, 
+              email, 
+              phone, 
+              total: 1398,
+              paymentId: response.razorpay_payment_id
+            }),
+          });
+
+          if (orderResponse.ok) {
+            alert("✅ Payment successful! Order placed.");
+            router.push("/");
+          } else {
+            alert("❌ Payment successful but order recording failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: `${firstName} ${lastName}`,
+          email: email,
+          contact: phone
+        },
+        theme: {
+          color: "#e11d48" // rose-600
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        alert("❌ Payment failed: " + response.error.description);
+      });
+      rzp.open();
+
+    } catch (error) {
+      alert("❌ Error initializing payment. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Breadcrumb */}
@@ -211,9 +287,13 @@ export default function CheckoutPage() {
                 <span className="text-green-800">Secure payment protected by SSL</span>
               </div>
 
-              <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white text-lg py-4 h-auto font-bold">
+              <Button 
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white text-lg py-4 h-auto font-bold"
+                onClick={handleCompleteOrder}
+                disabled={loading}
+              >
                 <Lock className="mr-2 h-5 w-5" />
-                Complete Purchase
+                {loading ? "Processing..." : "Complete Purchase"}
               </Button>
 
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">

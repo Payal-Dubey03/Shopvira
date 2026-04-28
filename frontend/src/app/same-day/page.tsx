@@ -3,8 +3,37 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, MapPin, Clock, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SameDayPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleOrderNow = async (itemName?: string, price?: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          productName: itemName || "Same Day Delivery Order",
+          price: price || "0",
+          deliveryType: "same-day"
+        }),
+      });
+
+      if (!response.ok) throw new Error("Order failed");
+      alert(`✅ Order placed! Proceed to checkout?`);
+      router.push("/checkout");
+    } catch (error) {
+      alert("❌ Error placing order. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Breadcrumb */}
@@ -29,8 +58,12 @@ export default function SameDayPage() {
           <p className="text-xl text-gray-700 mb-6 max-w-2xl">
             Order before 2 PM and get your gift delivered the same day!
           </p>
-          <Button className="bg-green-600 hover:bg-green-700 text-white text-lg h-auto px-8 py-3">
-            Order Now
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white text-lg h-auto px-8 py-3"
+            onClick={() => handleOrderNow()}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Order Now"}
           </Button>
         </div>
       </div>
@@ -94,8 +127,12 @@ export default function SameDayPage() {
                 <div className="text-5xl mb-3">{item.emoji}</div>
                 <h3 className="font-bold text-lg text-gray-900 mb-2">{item.name}</h3>
                 <p className="text-green-600 font-bold text-lg mb-4">{item.price}</p>
-                <Button className="w-full bg-green-600 hover:bg-green-700">
-                  Order Now
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => handleOrderNow(item.name, item.price)}
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : "Order Now"}
                 </Button>
               </div>
             ))}

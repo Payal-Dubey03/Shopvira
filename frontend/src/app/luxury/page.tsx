@@ -3,8 +3,30 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Star } from "lucide-react";
+import { useState } from "react";
 
 export default function LuxuryGiftsPage() {
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async (productName: string, price: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName, price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add to cart");
+      alert(`✅ ${productName} added to cart!`);
+    } catch (error) {
+      alert("❌ Error adding to cart. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Breadcrumb */}
@@ -93,8 +115,13 @@ export default function LuxuryGiftsPage() {
                       <h3 className="font-bold text-lg text-gray-900 mb-2">{product.name}</h3>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-rose-600">{product.price}</span>
-                        <Button size="sm" className="bg-rose-500 hover:bg-rose-600">
-                          Add to Cart
+                        <Button 
+                          size="sm" 
+                          className="bg-rose-500 hover:bg-rose-600"
+                          onClick={() => handleAddToCart(product.name, product.price)}
+                          disabled={loading}
+                        >
+                          {loading ? "Adding..." : "Add to Cart"}
                         </Button>
                       </div>
                     </div>

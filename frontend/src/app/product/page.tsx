@@ -2,10 +2,34 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { WhatsAppCheckoutButton } from "@/components/whatsapp-checkout-button";
 import { GroupGiftingModal } from "@/components/group-gifting-modal";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ProductPage() {
   const productName = "Premium Wireless Headphones";
   const price = 299;
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName, price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add to cart");
+
+      alert(`✅ ${productName} added to cart!`);
+    } catch (error) {
+      alert("❌ Error adding to cart. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-8">
@@ -31,7 +55,14 @@ export default function ProductPage() {
           <div className="pt-4 border-t space-y-4">
             <h3 className="font-medium text-lg">Purchase Options</h3>
             <div className="grid gap-3">
-              <Button size="lg" className="w-full">Add to Cart</Button>
+              <Button 
+                size="lg" 
+                className="w-full"
+                onClick={handleAddToCart}
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add to Cart"}
+              </Button>
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

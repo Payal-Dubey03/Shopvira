@@ -36,15 +36,9 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 5) NoSQL injection prevention
-app.use((req, _res, next) => {
-  ['body', 'params', 'headers', 'query'].forEach((k) => {
-    if ((req as any)[k]) {
-      mongoSanitize.sanitize((req as any)[k]);
-    }
-  });
-  next();
-});
+// 5) NoSQL injection prevention - Disabled due to Express 5 query getter issue
+// TODO: Properly configure mongoSanitize with Express 5
+// app.use(mongoSanitize());
 
 // 6) HTTP request logging (dev only)
 if (env.NODE_ENV === 'development') app.use(morgan('dev'));

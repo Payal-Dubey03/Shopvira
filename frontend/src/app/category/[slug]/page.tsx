@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Heart } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
 const categoryData: Record<string, any> = {
   birthday: {
@@ -58,12 +59,37 @@ const categoryData: Record<string, any> = {
 
 export default function CategoryPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
+  const [loading, setLoading] = useState(false);
   const category = categoryData[slug] || {
     title: "Products",
     emoji: "🎁",
     description: "Browse our collection",
     color: "from-rose-50 to-pink-50",
+  };
+
+  const handleAddToCart = async (productName: string, price: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName, price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add to cart");
+      alert(`✅ ${productName} added to cart!`);
+    } catch (error) {
+      alert("❌ Error adding to cart. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    alert("Loading more products...");
   };
 
   const products = [
@@ -177,8 +203,13 @@ export default function CategoryPage() {
                       <h3 className="font-bold text-lg text-gray-900 mb-2">{product.name}</h3>
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-rose-600">{product.price}</span>
-                        <Button size="sm" className="bg-rose-500 hover:bg-rose-600">
-                          Add to Cart
+                        <Button 
+                          size="sm" 
+                          className="bg-rose-500 hover:bg-rose-600"
+                          onClick={() => handleAddToCart(product.name, product.price)}
+                          disabled={loading}
+                        >
+                          {loading ? "Adding..." : "Add to Cart"}
                         </Button>
                       </div>
                     </div>
@@ -188,7 +219,12 @@ export default function CategoryPage() {
 
               {/* Load More */}
               <div className="text-center mt-12">
-                <Button variant="outline" size="lg" className="border-rose-600 text-rose-600 hover:bg-rose-50">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-rose-600 text-rose-600 hover:bg-rose-50"
+                  onClick={handleLoadMore}
+                >
                   Load More Products
                 </Button>
               </div>

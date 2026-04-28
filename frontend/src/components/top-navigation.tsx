@@ -2,42 +2,40 @@
 
 import Link from "next/link";
 import { MapPin, Truck, IndianRupee, Building2, MessageCircle, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+const quickLinks = [
+  { icon: <Truck className="h-4 w-4" />, label: "Same Day", href: "/same-day" },
+  { icon: <IndianRupee className="h-4 w-4" />, label: "INR", href: "/currency" },
+  { icon: <Building2 className="h-4 w-4" />, label: "Corporate", href: "/corporate" },
+  { icon: <MessageCircle className="h-4 w-4" />, label: "Support", href: "/support" },
+];
 
 export function TopNavigation() {
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="hidden md:block bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between py-3 text-sm">
-          {/* Left: Location */}
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-rose-500" />
-            <span className="font-medium text-gray-700">Where to deliver?</span>
-            <span className="text-rose-500 cursor-pointer hover:text-rose-600">Location missing ▼</span>
+        <div className="flex items-center justify-between py-2 text-xs text-gray-600 dark:text-gray-400">
+          {/* Location */}
+          <div className="flex items-center gap-1.5 cursor-pointer hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+            <MapPin className="h-3.5 w-3.5 text-violet-500" />
+            <span className="font-medium">Deliver to:</span>
+            <span className="text-violet-600 dark:text-violet-400 font-semibold underline underline-offset-2">
+              Select location ▾
+            </span>
           </div>
 
-          {/* Right: Quick Links */}
-          <div className="flex items-center space-x-6">
-            <Button variant="ghost" size="sm" className="flex flex-col items-center h-auto py-1 px-2">
-              <Truck className="h-4 w-4 mb-1" />
-              <span className="text-xs">Same Day</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center h-auto py-1 px-2">
-              <IndianRupee className="h-4 w-4 mb-1" />
-              <span className="text-xs">INR</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center h-auto py-1 px-2">
-              <Building2 className="h-4 w-4 mb-1" />
-              <span className="text-xs">Corporate</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center h-auto py-1 px-2">
-              <MessageCircle className="h-4 w-4 mb-1" />
-              <span className="text-xs">Support</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center h-auto py-1 px-2">
-              <MoreHorizontal className="h-4 w-4 mb-1" />
-              <span className="text-xs">More</span>
-            </Button>
+          {/* Quick Links */}
+          <div className="flex items-center gap-4">
+            {quickLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-400 transition-colors font-medium"
+              >
+                {link.icon}
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

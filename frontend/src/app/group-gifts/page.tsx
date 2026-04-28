@@ -3,8 +3,52 @@
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function GroupGiftsPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleStartGroupGift = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/group-gifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create group gift");
+      alert("✅ Group gift created! Share the link with your friends.");
+      router.push("/checkout");
+    } catch (error) {
+      alert("❌ Error creating group gift. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendWithGroup = async (itemName: string, price: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/group-gifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", productName: itemName, price }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send group gift");
+      alert(`✅ ${itemName} added to group gift!`);
+    } catch (error) {
+      alert("❌ Error sending group gift. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Breadcrumb */}
@@ -29,8 +73,12 @@ export default function GroupGiftsPage() {
           <p className="text-xl text-gray-700 mb-6 max-w-2xl">
             Collect money from friends and send memorable group gifts for any occasion. No hassle, all joy!
           </p>
-          <Button className="bg-rose-500 hover:bg-rose-600 text-white text-lg h-auto px-8 py-3">
-            Start a Group Gift
+          <Button 
+            className="bg-rose-500 hover:bg-rose-600 text-white text-lg h-auto px-8 py-3"
+            onClick={handleStartGroupGift}
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Start a Group Gift"}
           </Button>
         </div>
       </div>
@@ -83,8 +131,12 @@ export default function GroupGiftsPage() {
                 <div className="text-5xl mb-3">{item.emoji}</div>
                 <h3 className="font-bold text-lg text-gray-900 mb-2">{item.name}</h3>
                 <p className="text-rose-600 font-bold text-lg mb-4">{item.price}</p>
-                <Button className="w-full bg-rose-500 hover:bg-rose-600">
-                  Send with Group
+                <Button 
+                  className="w-full bg-rose-500 hover:bg-rose-600"
+                  onClick={() => handleSendWithGroup(item.name, item.price)}
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : "Send with Group"}
                 </Button>
               </div>
             ))}
@@ -101,8 +153,12 @@ export default function GroupGiftsPage() {
           <p className="text-white mb-6 text-lg">
             Create your first group gift now and share the joy
           </p>
-          <Button className="bg-white text-rose-600 hover:bg-gray-100 text-lg h-auto px-8 py-3">
-            Create a Group Gift
+          <Button 
+            className="bg-white text-rose-600 hover:bg-gray-100 text-lg h-auto px-8 py-3"
+            onClick={handleStartGroupGift}
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Create a Group Gift"}
           </Button>
         </div>
       </div>

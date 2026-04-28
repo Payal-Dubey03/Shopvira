@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ChatProvider } from "@/lib/context/ChatContext";
+import { ChatWidget } from "@/components/chat-widget";
+import { TopNavigation } from "@/components/top-navigation";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "ShopVira",
-  description: "Modern E-Commerce Platform",
+  title: "ShopVira — Gift Perfectly, Every Time",
+  description:
+    "India's most loved gifting platform. Discover handpicked gifts from local artisans with same-day delivery, group gifting, and AI recommendations.",
+  keywords: "gifts, flowers, cakes, same day delivery, group gifting, India, ShopVira",
 };
 
 export default function RootLayout({
@@ -29,21 +29,24 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
+      <body className="min-h-full flex flex-col bg-white dark:bg-gray-950 antialiased">
+        <ChatProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <TopNavigation />
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <ChatWidget currentPage="home" />
+            <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+          </ThemeProvider>
+        </ChatProvider>
       </body>
     </html>
   );
